@@ -1,8 +1,11 @@
 {
   "name": "retejs-v2-chatbot-programming",
   "version": "1.0.0",
-  "description": null,
-  "keywords": ["rete.js", "rete.js 2"],
+  "description": "Created with CodeSandbox",
+  "keywords": [
+    "rete.js",
+    "rete.js 2"
+  ],
   "main": "src/index.tsx",
   "dependencies": {
     "@types/styled-components": "5.1.26",
@@ -35,5 +38,12 @@
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   },
-  "browserslist": [">0.2%", "not dead", "not ie <= 11", "not op_mini all"]
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ],
+  "author": "",
+  "license": "ISC"
 }
