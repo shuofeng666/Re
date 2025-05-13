@@ -1,0 +1,270 @@
+// src/blockly/examples/hotWireFoamExample.xml
+<xml xmlns="https://developers.google.com/blockly/xml">
+  <variables>
+    <variable id="sceneData">sceneData</variable>
+    <variable id="modelData">modelData</variable>
+    <variable id="projections">projections</variable>
+    <variable id="foamMaterial">foamMaterial</variable>
+    <variable id="validationResult">validationResult</variable>
+    <variable id="sequence">sequence</variable>
+    <variable id="board">board</variable>
+  </variables>
+  
+  <!-- 创建主工作流 -->
+  <block type="text" id="title_comment" x="20" y="20">
+    <field name="TEXT">热线泡沫切割工作流示例</field>
+  </block>
+  
+  <!-- 1. 初始化3D场景 -->
+  <block type="variables_set" id="init_scene" x="20" y="60">
+    <field name="VAR" id="sceneData">sceneData</field>
+    <value name="VALUE">
+      <block type="scene3d_init">
+        <value name="CONTAINER_ID">
+          <block type="text">
+            <field name="TEXT">canvas-container</field>
+          </block>
+        </value>
+        <field name="CAMERA_TYPE">perspective</field>
+      </block>
+    </value>
+    <next>
+      
+      <!-- 2. 创建泡沫材质 -->
+      <block type="variables_set">
+        <field name="VAR" id="foamMaterial">foamMaterial</field>
+        <value name="VALUE">
+          <block type="material_creator_advanced">
+            <field name="PRESET">foam</field>
+          </block>
+        </value>
+        <next>
+          
+          <!-- 3. 加载STL模型 -->
+          <block type="variables_set">
+            <field name="VAR" id="modelData">modelData</field>
+            <value name="VALUE">
+              <block type="stl_loader_advanced">
+                <value name="FILE_PATH">
+                  <block type="text">
+                    <field name="TEXT">/models/example.stl</field>
+                  </block>
+                </value>
+                <value name="MATERIAL">
+                  <block type="variables_get">
+                    <field name="VAR" id="foamMaterial">foamMaterial</field>
+                  </block>
+                </value>
+                <field name="CENTER">TRUE</field>
+                <field name="ROTATE_X">-90</field>
+              </block>
+            </value>
+            <next>
+              
+              <!-- 4. 添加模型到场景 -->
+              <block type="scene_add_mesh">
+                <value name="SCENE">
+                  <block type="variables_get">
+                    <field name="VAR" id="sceneData">sceneData</field>
+                  </block>
+                </value>
+                <value name="MESH">
+                  <block type="variables_get">
+                    <field name="VAR" id="modelData">modelData</field>
+                  </block>
+                </value>
+                <next>
+                  
+                  <!-- 5. 验证模型尺寸 -->
+                  <block type="variables_set">
+                    <field name="VAR" id="validationResult">validationResult</field>
+                    <value name="VALUE">
+                      <block type="dimension_validator">
+                        <value name="MESH">
+                          <block type="variables_get">
+                            <field name="VAR" id="modelData">modelData</field>
+                          </block>
+                        </value>
+                        <value name="MAX_WIDTH">
+                          <block type="math_number">
+                            <field name="NUM">508</field>
+                          </block>
+                        </value>
+                        <value name="MAX_HEIGHT">
+                          <block type="math_number">
+                            <field name="NUM">812.8</field>
+                          </block>
+                        </value>
+                        <value name="MAX_DEPTH">
+                          <block type="math_number">
+                            <field name="NUM">100</field>
+                          </block>
+                        </value>
+                      </block>
+                    </value>
+                    <next>
+                      
+                      <!-- 6. 生成投影 -->
+                      <block type="variables_set">
+                        <field name="VAR" id="projections">projections</field>
+                        <value name="VALUE">
+                          <block type="projection_generator_advanced">
+                            <value name="GEOMETRY">
+                              <block type="variables_get">
+                                <field name="VAR" id="modelData">modelData</field>
+                              </block>
+                            </value>
+                            <field name="PLANE">all</field>
+                            <field name="CONCAVITY">10</field>
+                          </block>
+                        </value>
+                        <next>
+                          
+                          <!-- 7. 创建挤出模板（示例：XY平面） -->
+                          <block type="scene_add_mesh">
+                            <value name="SCENE">
+                              <block type="variables_get">
+                                <field name="VAR" id="sceneData">sceneData</field>
+                              </block>
+                            </value>
+                            <value name="MESH">
+                              <block type="extrude_shape_advanced">
+                                <value name="POINTS">
+                                  <block type="variables_get">
+                                    <field name="VAR" id="projections">projections</field>
+                                  </block>
+                                </value>
+                                <value name="DEPTH">
+                                  <block type="math_number">
+                                    <field name="NUM">3</field>
+                                  </block>
+                                </value>
+                                <field name="BEVEL_ENABLED">FALSE</field>
+                              </block>
+                            </value>
+                            <next>
+                              
+                              <!-- 8. 设置泡沫板 -->
+                              <block type="variables_set">
+                                <field name="VAR" id="board">board</field>
+                                <value name="VALUE">
+                                  <block type="foam_board_setup">
+                                    <value name="WIDTH">
+                                      <block type="math_number">
+                                        <field name="NUM">600</field>
+                                      </block>
+                                    </value>
+                                    <value name="HEIGHT">
+                                      <block type="math_number">
+                                        <field name="NUM">900</field>
+                                      </block>
+                                    </value>
+                                    <value name="THICKNESS">
+                                      <block type="math_number">
+                                        <field name="NUM">50</field>
+                                      </block>
+                                    </value>
+                                    <field name="FOAM_TYPE">eps</field>
+                                  </block>
+                                </value>
+                                <next>
+                                  
+                                  <!-- 9. 生成切割顺序 -->
+                                  <block type="variables_set">
+                                    <field name="VAR" id="sequence">sequence</field>
+                                    <value name="VALUE">
+                                      <block type="cutting_sequence_generator">
+                                        <value name="PROJECTIONS">
+                                          <block type="variables_get">
+                                            <field name="VAR" id="projections">projections</field>
+                                          </block>
+                                        </value>
+                                        <field name="STRATEGY">optimal</field>
+                                      </block>
+                                    </value>
+                                    <next>
+                                      
+                                      <!-- 10. 添加可视化辅助 -->
+                                      <block type="visual_helpers">
+                                        <value name="SCENE">
+                                          <block type="variables_get">
+                                            <field name="VAR" id="sceneData">sceneData</field>
+                                          </block>
+                                        </value>
+                                        <value name="MESH">
+                                          <block type="variables_get">
+                                            <field name="VAR" id="modelData">modelData</field>
+                                          </block>
+                                        </value>
+                                        <field name="BOUNDING_BOX">TRUE</field>
+                                        <field name="GRID">TRUE</field>
+                                        <field name="AXES">TRUE</field>
+                                        <field name="LABELS">TRUE</field>
+                                        <next>
+                                          
+                                          <!-- 11. 显示切割路径 -->
+                                          <block type="cutting_path_visualizer">
+                                            <value name="SCENE">
+                                              <block type="variables_get">
+                                                <field name="VAR" id="sceneData">sceneData</field>
+                                              </block>
+                                            </value>
+                                            <value name="MODEL">
+                                              <block type="variables_get">
+                                                <field name="VAR" id="modelData">modelData</field>
+                                              </block>
+                                            </value>
+                                            <field name="SHOW_TOP">TRUE</field>
+                                            <field name="SHOW_SIDE">TRUE</field>
+                                            <field name="SHOW_FRONT">TRUE</field>
+                                            <next>
+                                              
+                                              <!-- 12. 导出SVG文件 -->
+                                              <block type="export_file">
+                                                <value name="DATA">
+                                                  <block type="variables_get">
+                                                    <field name="VAR" id="projections">projections</field>
+                                                  </block>
+                                                </value>
+                                                <value name="FILENAME">
+                                                  <block type="text">
+                                                    <field name="TEXT">foam_cutting_template</field>
+                                                  </block>
+                                                </value>
+                                                <field name="FILE_TYPE">svg</field>
+                                                <next>
+                                                  
+                                                  <!-- 13. 启动渲染循环 -->
+                                                  <block type="render_loop">
+                                                    <value name="SCENE">
+                                                      <block type="variables_get">
+                                                        <field name="VAR" id="sceneData">sceneData</field>
+                                                      </block>
+                                                    </value>
+                                                  </block>
+                                                  
+                                                </next>
+                                              </block>
+                                            </next>
+                                          </block>
+                                        </next>
+                                      </block>
+                                    </next>
+                                  </block>
+                                </next>
+                              </block>
+                            </next>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </next>
+  </block>
+</xml>
